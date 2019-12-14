@@ -1,4 +1,5 @@
 import { Component, ViewChild, ElementRef, AfterViewInit } from '@angular/core';
+
 import { fromEvent, timer, Subscription } from 'rxjs';
 
 @Component({
@@ -29,10 +30,6 @@ export class AppComponent implements AfterViewInit {
     this.kanvas.nativeElement.width = window.innerWidth;
     this.kanvas.nativeElement.height = window.innerHeight;
     this.kontekstKanvasa = (<HTMLCanvasElement>this.kanvas.nativeElement).getContext('2d');
-
-    this.kontekstKanvasa.lineWidth = 1;
-    this.kontekstKanvasa.lineCap = 'round';
-    this.kontekstKanvasa.strokeStyle = '#000';
 
     for (let i = 0; i < this.brojNanobota; i++)
       this.nanoboti.push(new Nanobot(this.kontekstKanvasa));
@@ -69,11 +66,6 @@ export class AppComponent implements AfterViewInit {
   }
 
   traziTkivo(): void {
-    // For each particle 
-    // Calculate fitness value
-    // If the fitness value is better than the best fitness value (pBest) in history
-    //     set current value as the new pBest
-    // End
     this.nanoboti[0].izracunajDobrotu(this.tkivoX, this.tkivoY);
     let najboljaDobrota: number = this.nanoboti[0].dobrota;
     let indeksNajboljeDobrote: number = 0;
@@ -97,12 +89,7 @@ export class AppComponent implements AfterViewInit {
     this.gBestX = this.nanoboti[indeksNajboljeDobrote].x;
     this.gBestY = this.nanoboti[indeksNajboljeDobrote].y;
 
-    // For each particle 
-    //     Calculate particle velocity according equation
-    //     Update particle position according equation
-    // End 
     this.nanoboti.forEach(nanobot => {
-
       const rand = Math.random();
 
       if (this.gBest == nanobot.dobrota) {
@@ -110,14 +97,14 @@ export class AppComponent implements AfterViewInit {
         nanobot.y = (1 - rand) * nanobot.y + rand * this.tkivoY;
       }
 
-      const velocityX = nanobot.velocityX + 2 * rand * (nanobot.pBestX - nanobot.x) + 2 * rand * (this.gBestX - nanobot.x);
-      const velocityY = nanobot.velocityY + 2 * rand * (nanobot.pBestY - nanobot.y) + 2 * rand * (this.gBestY - nanobot.y);
+      const smerKretanjaX = nanobot.smerKretanjaX + 2 * rand * (nanobot.pBestX - nanobot.x) + 2 * rand * (this.gBestX - nanobot.x);
+      const smerKretanjaY = nanobot.smerKretanjaY + 2 * rand * (nanobot.pBestY - nanobot.y) + 2 * rand * (this.gBestY - nanobot.y);
 
-      if (velocityX > 0 && velocityX < window.innerWidth && velocityY > 0 && velocityY < window.innerHeight) {
-        nanobot.velocityX = velocityX;
-        nanobot.velocityY = velocityY;
-        nanobot.x = nanobot.velocityX;
-        nanobot.y = nanobot.velocityY;
+      if (smerKretanjaX > 0 && smerKretanjaX < window.innerWidth && smerKretanjaY > 0 && smerKretanjaY < window.innerHeight) {
+        nanobot.smerKretanjaX = smerKretanjaX;
+        nanobot.smerKretanjaY = smerKretanjaY;
+        nanobot.x = nanobot.smerKretanjaX;
+        nanobot.y = nanobot.smerKretanjaY;
         this.nacrtaj();
       }
     });
@@ -125,22 +112,21 @@ export class AppComponent implements AfterViewInit {
 
   nacrtaj(): void {
     this.kontekstKanvasa.clearRect(0, 0, window.innerWidth, window.innerHeight);
-    this.kontekstKanvasa.fillStyle = 'red';
-    this.kontekstKanvasa.fillRect(this.tkivoX - 8, this.tkivoY - 8, 16, 16);
+    this.kontekstKanvasa.fillStyle = 'purple';
+    this.kontekstKanvasa.fillRect(this.tkivoX - 10, this.tkivoY - 10, 20, 20);
     this.nanoboti.forEach(x => x.nacrtaj());
   }
 
   start(): void {
     if (this.sabskripcija != undefined)
       this.sabskripcija.unsubscribe();
-    this.sabskripcija = timer(0, this.brzina).subscribe(() => this.traziTkivo());
+    this.sabskripcija = timer(0, this.brzina).subscribe(() => {
+      this.traziTkivo();
+    });
   }
 }
 
-class Nanobot {
-  kontekstKanvasa: CanvasRenderingContext2D;
-
-  indeks: number = 0;
+class Nanobot {indeks: number = 0;
   dobrota: number = 0;
   x: number = 0;
   y: number = 0;
@@ -149,22 +135,19 @@ class Nanobot {
   pBestX: number = 0;
   pBestY: number = 0;
 
-  velocityX: number = 0;
-  velocityY: number = 0;
+  smerKretanjaX: number = 0;
+  smerKretanjaY: number = 0;
 
-  constructor(kontekst: CanvasRenderingContext2D) {
-    this.kontekstKanvasa = kontekst;
-  }
+  constructor(private kontekstKanvasa: CanvasRenderingContext2D) { }
 
   inicijalizuj(indeks: number, x: number, y: number): void {
     this.indeks = indeks;
-
     this.x = x;
     this.y = y;
     this.pBestX = this.x;
     this.pBestY = this.y;
-    this.velocityX = this.x;
-    this.velocityY = this.y;
+    this.smerKretanjaX = this.x;
+    this.smerKretanjaY = this.y;
   }
 
   izracunajDobrotu(tkivoX: number, tkivoY: number): void {
@@ -172,7 +155,34 @@ class Nanobot {
   }
 
   nacrtaj(): void {
-    this.kontekstKanvasa.fillStyle = 'blue';
+    this.kontekstKanvasa.lineWidth = 2;
+    this.kontekstKanvasa.lineCap = 'round';
+    this.kontekstKanvasa.strokeStyle = 'grey';
+    this.kontekstKanvasa.fillStyle = 'grey';
     this.kontekstKanvasa.fillRect(this.x - 5, this.y - 5, 10, 10);
+
+    this.kontekstKanvasa.beginPath();
+    this.kontekstKanvasa.moveTo(this.x, this.y);
+    this.kontekstKanvasa.lineTo(this.x - 10, this.y + 10);
+    this.kontekstKanvasa.lineTo(this.x - 10, this.y + 15);
+    this.kontekstKanvasa.stroke();
+
+    this.kontekstKanvasa.beginPath();
+    this.kontekstKanvasa.moveTo(this.x, this.y);
+    this.kontekstKanvasa.lineTo(this.x + 10, this.y + 10);
+    this.kontekstKanvasa.lineTo(this.x + 10, this.y + 15);
+    this.kontekstKanvasa.stroke();
+
+    this.kontekstKanvasa.beginPath();
+    this.kontekstKanvasa.moveTo(this.x, this.y);
+    this.kontekstKanvasa.lineTo(this.x - 10, this.y - 10);
+    this.kontekstKanvasa.lineTo(this.x - 10, this.y - 15);
+    this.kontekstKanvasa.stroke();
+
+    this.kontekstKanvasa.beginPath();
+    this.kontekstKanvasa.moveTo(this.x, this.y);
+    this.kontekstKanvasa.lineTo(this.x + 10, this.y - 10);
+    this.kontekstKanvasa.lineTo(this.x + 10, this.y - 15);
+    this.kontekstKanvasa.stroke();
   }
 }
