@@ -16,7 +16,7 @@ export class AppComponent implements AfterViewInit {
 
   nanoboti: Nanobot[] = []
   brojNanobota: number = 100;
-  brzina: number = 500;
+  brzina: number = 5000;
 
   tkivoX: number = 1200;
   tkivoY: number = 800;
@@ -109,7 +109,10 @@ export class AppComponent implements AfterViewInit {
   }
 
   nacrtaj(): void {
-    this.kontekstKanvasa.clearRect(0, 0, window.innerWidth, window.innerHeight);
+    this.kontekstKanvasa.clearRect(0, 0, this.kanvas.nativeElement.width, this.kanvas.nativeElement.height);
+    this.kontekstKanvasa.fillStyle = 'lightpink';
+    this.kontekstKanvasa.fillRect(0, 0, this.kanvas.nativeElement.width, this.kanvas.nativeElement.height);
+
     this.kontekstKanvasa.fillStyle = 'purple';
     this.kontekstKanvasa.fillRect(this.tkivoX - 10, this.tkivoY - 10, 20, 20);
     this.nanoboti.forEach(x => x.nacrtaj());
@@ -121,6 +124,20 @@ export class AppComponent implements AfterViewInit {
     this.sabskripcija = timer(0, this.brzina).subscribe(() => {
       this.traziTkivo();
     });
+  }
+
+  sacuvajKanvas(imeFajla) {
+    var format = "image/png";
+    var url = this.kanvas.nativeElement.toDataURL(format);
+    var link = document.createElement('a');
+
+    link.download = imeFajla;
+    link.href = url;
+    link.dataset.downloadurl = [format, link.download, link.href].join(':');
+
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   }
 }
 
