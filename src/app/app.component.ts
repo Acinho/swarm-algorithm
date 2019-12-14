@@ -76,7 +76,6 @@ export class AppComponent implements AfterViewInit {
         najboljaDobrota = nanobot.dobrota;
         indeksNajboljeDobrote = nanobot.indeks;
       }
-
       if (nanobot.dobrota < nanobot.pBest) {
         nanobot.pBest = nanobot.dobrota;
         nanobot.pBestX = nanobot.x;
@@ -84,7 +83,6 @@ export class AppComponent implements AfterViewInit {
       }
 
     });
-
     this.gBest = najboljaDobrota;
     this.gBestX = this.nanoboti[indeksNajboljeDobrote].x;
     this.gBestY = this.nanoboti[indeksNajboljeDobrote].y;
@@ -126,7 +124,8 @@ export class AppComponent implements AfterViewInit {
   }
 }
 
-class Nanobot {indeks: number = 0;
+class Nanobot {
+  indeks: number = 0;
   dobrota: number = 0;
   x: number = 0;
   y: number = 0;
