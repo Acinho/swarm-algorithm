@@ -16,7 +16,7 @@ export class AppComponent implements AfterViewInit {
 
   nanoboti: Nanobot[] = []
   brojNanobota: number = 100;
-  brzina: number = 5000;
+  brzina: number = 1500;
 
   tkivoX: number = 1200;
   tkivoY: number = 800;
